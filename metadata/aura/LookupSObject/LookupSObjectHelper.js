@@ -1,8 +1,10 @@
 /**
  * (c) Tony Scott. This code is provided as is and without warranty of any kind.
+ * Adapted for use in a VF page, removed need for two components, removed events - Caspar Harmer
  *
  * This work by Tony Scott is licensed under a Creative Commons Attribution 3.0 Unported License.
  * http://creativecommons.org/licenses/by/3.0/deed.en_US
+
  */
 ({
     /**
@@ -16,7 +18,7 @@
 
         // Clear any errors and destroy the old lookup items container
         inputElement.set('v.errors', null);
-        
+
         // We need at least 2 characters for an effective search
         if (typeof searchString === 'undefined' || searchString.length < 2)
         {
@@ -39,7 +41,7 @@
 
         // Set the parameters
         action.setParams({ "searchString" : searchString, "sObjectAPIName" : sObjectAPIName});
-                          
+
         // Define the callback
         action.setCallback(this, function(response) {
             var state = response.getState();
@@ -56,17 +58,17 @@
                     cmp.set('v.matches', null);
                     return;
                 }
-                
+
                 // Store the results
                 cmp.set('v.matches', matches);
             }
             else if (state === "ERROR") // Handle any error by reporting it
             {
                 var errors = response.getError();
-                
-                if (errors) 
+
+                if (errors)
                 {
-                    if (errors[0] && errors[0].message) 
+                    if (errors[0] && errors[0].message)
                     {
                         this.displayToast('Error', errors[0].message);
                     }
@@ -77,9 +79,9 @@
                 }
             }
         });
-        
-        // Enqueue the action                  
-        $A.enqueueAction(action);                
+
+        // Enqueue the action
+        $A.enqueueAction(action);
     },
 
     /**
@@ -88,30 +90,19 @@
     handleSelection : function(cmp, event) {
         // Resolve the Object Id from the events Element Id (this will be the <a> tag)
         var objectId = this.resolveId(event.currentTarget.id);
+                // Set the Id bound to the View
+                cmp.set('v.recordId', objectId);
 
         // The Object label is the inner text)
         var objectLabel = event.currentTarget.innerText;
 
+                // Update the Searchstring with the Label
+                cmp.set("v.searchString", objectLabel);
+
         // Log the Object Id and Label to the console
         console.log('objectId=' + objectId);
         console.log('objectLabel=' + objectLabel);
-                
-        // Create the UpdateLookupId event
-        var updateEvent = cmp.getEvent("updateLookupIdEvent");
-        
-        // Get the Instance Id of the Component
-        var instanceId = cmp.get('v.instanceId');
 
-        // Populate the event with the selected Object Id and Instance Id
-        updateEvent.setParams({
-            "sObjectId" : objectId, "instanceId" : instanceId
-        });
-
-        // Fire the event
-        updateEvent.fire();
-
-        // Update the Searchstring with the Label
-        cmp.set("v.searchString", objectLabel);
 
         // Hide the Lookup List
         var lookupList = cmp.find("lookuplist");
@@ -135,22 +126,10 @@
      * Clear the Selection
      */
     clearSelection : function(cmp) {
-        // Create the ClearLookupId event
-        var clearEvent = cmp.getEvent("clearLookupIdEvent");
-
-        // Get the Instance Id of the Component
-        var instanceId = cmp.get('v.instanceId');
-
-        // Populate the event with the Instance Id
-        clearEvent.setParams({
-            "instanceId" : instanceId
-        });
-        
-        // Fire the event
-        clearEvent.fire();
 
         // Clear the Searchstring
         cmp.set("v.searchString", '');
+                cmp.set('v.recordId', null);
 
         // Hide the Lookup pill
         var lookupPill = cmp.find("lookup-pill");
@@ -177,7 +156,7 @@
     /**
      * Display a message
      */
-    displayToast : function (title, message) 
+    displayToast : function (title, message)
     {
         var toast = $A.get("e.force:showToast");
 
@@ -196,5 +175,24 @@
         {
             alert(title + ': ' + message);
         }
+    },
+
+    loadFirstValue : function(cmp){
+
+        var action = cmp.get('c.getCurrentValue');
+        var self = this;
+        action.setParams({
+            'type' : cmp.get('v.sObjectAPIName'),
+            'value' : cmp.get('v.recordId'),
+        });
+
+        action.setCallback(this, function(a) {
+            if(a.error && a.error.length){
+                return $A.error('Unexpected error: '+a.error[0].message);
+            }
+            var result = a.getReturnValue();
+            cmp.set("v.searchString", result);
+        });
+        $A.enqueueAction(action);
     }
 })
