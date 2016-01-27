@@ -54,7 +54,7 @@ http://creativecommons.org/licenses/by/3.0/deed.en_US
                         </span>
                     </div>
                     <!-- This markup is for when searching for a string -->
-                    <ui:inputText aura:id="lookup" value="{!v.searchString}" class="slds-input" updateOn="keyup" keyup="{!c.search}" />
+                    <ui:inputText aura:id="lookup" value="{!v.searchString}" class="slds-input" updateOn="keyup" keyup="{!c.search}" blur="{!c.handleBlur}"/>
                 </div>
             </div>
             <!-- This is the lookup list markup. Initially it's hidden -->
