@@ -5,7 +5,7 @@ Adapted for use in a VF page, removed need for two components, removed events - 
 This work by Tony Scott is licensed under a Creative Commons Attribution 3.0 Unported License.
 http://creativecommons.org/licenses/by/3.0/deed.en_US
 -->
-<aura:component controller="LookupSObjectController" >
+<aura:component controller="LookupSObjectController" access="global" >
     <!-- Required Scripts/Styles -->
     <!-- Salesforce Lightning Design System : https://www.lightningdesignsystem.com/ -->
     <ltng:require styles="/resource/SLDS0110/assets/styles/salesforce-lightning-design-system-ltng.css" />
@@ -13,18 +13,22 @@ http://creativecommons.org/licenses/by/3.0/deed.en_US
     <!-- Component Init Handler -->
     <aura:handler name="init" value="{!this}" action="{!c.init}"/>
 
-    <!-- Attributes -->
-    <aura:attribute name="parentRecordId" type="Id" description="Record Id of the Host record (ie if this was a lookup on opp, the opp recid)" />
-    <aura:attribute name="lookupAPIName" type="String" description="Name of the lookup field ie Primary_Contact__c" />
+        <!-- Attributes -->
+    <aura:attribute name="parentRecordId" type="Id" description="Record Id of the Host record (ie if this was a lookup on opp, the opp recid)" access="global"/>
+    <aura:attribute name="lookupAPIName" type="String" description="Name of the lookup field ie Primary_Contact__c" access="global"/>
 
+    <aura:attribute name="sObjectAPIName" type="String" required="true" description="The API name of the SObject to search" access="global"/>
+    <aura:attribute name="label" type="String" required="true" description="The label to assign to the lookup, eg: Account" access="global"/>
+    <aura:attribute name="pluralLabel" type="String" required="true" description="The plural label to assign to the lookup, eg: Accounts" access="global"/>
+    <aura:attribute name="recordId" type="Id" description="The current record Id to display" access="global"/>
 
-    <aura:attribute name="recordId" type="Id" description="The current record Id to display" />
-    <aura:attribute name="sObjectAPIName" type="String" required="true" description="The API name of the SObject to search" />
-    <aura:attribute name="label" type="String" required="true" description="The label to assign to the lookup, eg: Account" />
-    <aura:attribute name="pluralLabel" type="String" required="true" description="The plural label to assign to the lookup, eg: Accounts" />
-    <aura:attribute name="listIconSVGPath" type="String" default="/resource/SLDS0110/assets/icons/custom-sprite/svg/symbols.svg#custom11" description="The static resource path to the svg icon to use." />
-    <aura:attribute name="listIconClass" type="String" default="slds-icon-custom-11" description="The SLDS class to use for the icon." />
-    <aura:attribute name="searchString" type="String" description="The search string to find." />
+    <aura:attribute name="listIconSVGPath" type="String" default="/resource/SLDS0110/assets/icons/custom-sprite/svg/symbols.svg#custom11" description="The static resource path to the svg icon to use." access="global"/>
+    <aura:attribute name="listIconClass" type="String" default="slds-icon-custom-11" description="The SLDS class to use for the icon." access="global"/>
+    <aura:attribute name="searchString" type="String" description="The search string to find." access="global"/>
+    <aura:attribute name="required" type="Boolean" description="Set to true if this lookup is required" access="global"/>
+    <aura:attribute name="filter" type="String" required="false" description="SOSL filter string ie AccountId = '0014B000003Sz5s'" access="global"/>
+
+    <aura:attribute name="callback" type="String" description="Call this to communcate results to parent" access="global"/>
 
     <!-- PRIVATE ATTRS -->
     <aura:attribute name="matches" type="LookupSObjectController.Result[]" description="The resulting matches returned by the Apex controller." />
