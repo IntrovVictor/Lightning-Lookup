@@ -29,13 +29,22 @@
         helper.clearSelection(cmp);
     },
 
+
     /**
-     * Resolve first value based on supplied Id
+     * If the input is requred, check if there is a value on blur
+     * and mark the input as error if no value
      */
+     handleBlur: function (cmp, event, helper) {
+
+         helper.handleBlur(cmp);
+     },
+
     init : function(cmp, event, helper){
       try{
         //first load the current value of the lookup field
-          helper.loadFirstValue(cmp);
+        helper.init(cmp);
+        helper.loadFirstValue(cmp);
+
         }catch(ex){
           console.log(ex);
         }
