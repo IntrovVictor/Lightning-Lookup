@@ -16,23 +16,22 @@
     
             var element = document.getElementById('lookup');
             element.innerHTML = '';
-    
+            
             $Lightning.use("c:LookupSObjectContainer", function () {
-              $Lightning.createComponent("c:LookupSObject", 
-              {
-                recordId: id, 
-                label: "Contact", 
-                pluralLabel: "Contacts", 
-                sObjectAPIName: "Contact", 
-                listIconSVGPath: "/resource/SLDS0110/assets/icons/standard-sprite/svg/symbols.svg#contact", 
-                listIconClass: "slds-icon-standard-contact"
-              }, 
-              "lookup", 
-              function (cmp) {
-                //callback if you need one
-              });
+              $Lightning.createComponent("c:LookupSObject", {
+                recordId: id,
+                label: label,
+                pluralLabel: "Accounts",
+                sObjectAPIName: "Account",
+                listIconSVGPath: "/resource/SLDS0110/assets/icons/standard-sprite/svg/symbols.svg#account",
+                listIconClass: "slds-icon-standard-account",
+                callback: function (data) {}),
+                filter: filter,
+                required: required
+              }, elementId, 
+              function (cmp) {}
+              );
             });
-    
           }
     
           initializeLookup('someid');
