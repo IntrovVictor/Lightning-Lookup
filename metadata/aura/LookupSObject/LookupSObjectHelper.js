@@ -7,6 +7,18 @@
 
  */
 ({
+
+    //lookup already initialized
+    initStatus : {},
+    init : function (cmp){
+      var required = cmp.get('v.required');
+      if (required){
+        var cmpTarget = cmp.find('lookup-form-element');
+        $A.util.addClass(cmpTarget, 'slds-is-required');
+      }
+    },
+
+
     /**
      * Perform the SObject search via an Apex Controller
      */
@@ -32,6 +44,8 @@
 
         // Get the API Name
         var sObjectAPIName = cmp.get('v.sObjectAPIName');
+        // Get the filter value, if any
+        var filter = cmp.get('v.filter');
 
         // Create an Apex action
         var action = cmp.get('c.lookup');
@@ -40,7 +54,7 @@
         action.setAbortable();
 
         // Set the parameters
-        action.setParams({ "searchString" : searchString, "sObjectAPIName" : sObjectAPIName});
+        action.setParams({ "searchString" : searchString, "sObjectAPIName" : sObjectAPIName, "filter" : filter});
 
         // Define the callback
         action.setCallback(this, function(response) {
@@ -90,19 +104,24 @@
     handleSelection : function(cmp, event) {
         // Resolve the Object Id from the events Element Id (this will be the <a> tag)
         var objectId = this.resolveId(event.currentTarget.id);
-                // Set the Id bound to the View
-                cmp.set('v.recordId', objectId);
+				// Set the Id bound to the View
+				cmp.set('v.recordId', objectId);
 
         // The Object label is the inner text)
         var objectLabel = event.currentTarget.innerText;
 
-                // Update the Searchstring with the Label
-                cmp.set("v.searchString", objectLabel);
+				// Update the Searchstring with the Label
+				cmp.set("v.searchString", objectLabel);
 
         // Log the Object Id and Label to the console
         console.log('objectId=' + objectId);
         console.log('objectLabel=' + objectLabel);
 
+        var func = cmp.get('v.callback');
+        console.log(func);
+        if (func){
+          func({id:objectId,name:objectLabel});
+        }
 
         // Hide the Lookup List
         var lookupList = cmp.find("lookuplist");
@@ -120,6 +139,10 @@
         var inputElement = cmp.find('lookup-div');
         $A.util.addClass(inputElement, 'slds-has-selection');
 
+        // Clear any error css
+        var cmpTarget = cmp.find('lookup-form-element');
+        $A.util.removeClass(cmpTarget, 'slds-has-error');
+
     },
 
     /**
@@ -129,7 +152,13 @@
 
         // Clear the Searchstring
         cmp.set("v.searchString", '');
-                cmp.set('v.recordId', null);
+				cmp.set('v.recordId', null);
+
+        var func = cmp.get('v.callback');
+        console.log(func);
+        if (func){
+          func({id:'',name:''});
+        }
 
         // Hide the Lookup pill
         var lookupPill = cmp.find("lookup-pill");
@@ -142,7 +171,27 @@
         // Lookup Div has no selection
         var inputElement = cmp.find('lookup-div');
         $A.util.removeClass(inputElement, 'slds-has-selection');
+
+        // If required, add error css
+        var required = cmp.get('v.required');
+        if (required){
+          var cmpTarget = cmp.find('lookup-form-element');
+          $A.util.removeClass(cmpTarget, 'slds-has-error');
+        }
+
+
+
     },
+
+    handleBlur: function(cmp) {
+
+       var required = cmp.get('v.required');
+       if (required){
+         var cmpTarget = cmp.find('lookup-form-element');
+         $A.util.addClass(cmpTarget, 'slds-has-error');
+       }
+
+   },
 
     /**
      * Resolve the Object Id from the Element Id by splitting the id at the _
@@ -192,6 +241,16 @@
             }
             var result = a.getReturnValue();
             cmp.set("v.searchString", result);
+
+            if (null!=result){
+              // Show the Lookup pill
+              var lookupPill = cmp.find("lookup-pill");
+              $A.util.removeClass(lookupPill, 'slds-hide');
+
+              // Lookup Div has selection
+              var inputElement = cmp.find('lookup-div');
+              $A.util.addClass(inputElement, 'slds-has-selection');
+            }
         });
         $A.enqueueAction(action);
     }
